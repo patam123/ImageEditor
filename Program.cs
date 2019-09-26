@@ -1,22 +1,70 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using ImageEditorLibrary;
+using System;
+using System.Drawing;
+using System.IO;
 
-namespace ImageModifierForms
+namespace ImageEditorConsole
 {
-    static class Program
+    class Program
     {
-        /// <summary>
-        /// The main entry point for the application.
-        /// </summary>
-        [STAThread]
-        static void Main()
+        static void Main(string[] args)
         {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
+            ImageEditor imageEditor = new ImageEditor();
+            FileManager fileManager = new FileManager();
+
+            string filePath;
+            Bitmap image = null;
+            if (args.Length != 0)
+            {
+                filePath = args[0];
+            }
+            else
+            {
+                Console.WriteLine("Choose an image to convert:");
+                filePath = Console.ReadLine();
+            }
+            try
+            {
+                if (fileManager.TryValidExtension(filePath))
+                {
+                    image = new Bitmap(filePath);
+                }
+                else
+                {
+                    while (!fileManager.TryValidExtension(filePath))
+                    {
+                        Console.WriteLine("Your input is not an image! Try again!");
+                        filePath = Console.ReadLine();
+                    }
+                    image = new Bitmap(filePath);
+                }
+            }
+            catch (ArgumentException)
+            {
+                Console.WriteLine("Invalid input. Could not find image!");
+                Environment.Exit(0);
+            }
+            catch (FileNotFoundException)
+            {
+                Console.WriteLine("File does not exist!");
+                Environment.Exit(0);
+            }
+
+            using (var negative = imageEditor.TransformToNegative(image))
+            {
+                negative.Save(fileManager.GetNewFilePath(filePath, "negative"));
+            }
+
+            using (var greyScale = imageEditor.TransformToGreyScale(image))
+            {
+                greyScale.Save(fileManager.GetNewFilePath(filePath, "greyscale"));
+            }
+
+            using (var blurred = imageEditor.TransformToBlurred(image))
+            {
+                blurred.Save(fileManager.GetNewFilePath(filePath, "blurred"));
+            }
+            image.Dispose();
         }
     }
 }

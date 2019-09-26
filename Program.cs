@@ -33,7 +33,7 @@ namespace ImageEditorConsole
                 {
                     while (!fileManager.TryValidExtension(filePath))
                     {
-                        Console.WriteLine("Your input is not an image! Try again!");
+                        Console.WriteLine("Your input \"{0}\" is not an image! Try again!", filePath);
                         filePath = Console.ReadLine();
                     }
                     image = new Bitmap(filePath);
@@ -41,12 +41,12 @@ namespace ImageEditorConsole
             }
             catch (ArgumentException)
             {
-                Console.WriteLine("Invalid input. Could not find image!");
+                Console.WriteLine("Invalid input:\n\"{0}\" is not a valid file name. Could not find image.", filePath);
                 Environment.Exit(0);
             }
             catch (FileNotFoundException)
             {
-                Console.WriteLine("File does not exist!");
+                Console.WriteLine("File \"{0}\" does not exist!", filePath);
                 Environment.Exit(0);
             }
 
